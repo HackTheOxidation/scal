@@ -13,20 +13,25 @@ def getNumberOfDays(month: Int): Int = month match
   case 4 | 6 | 9 | 11 => 30
   case _ => 31
 
-def printCalendar(): Unit =
-  val now = LocalDate.now()
-  val dayOfWeek = LocalDate.of(now.getYear, now.getMonth, 1).getDayOfWeek.getValue
-  val spacing = (1 until dayOfWeek).map(_ => "  ")
-  val daysAsString =
-    (spacing ++ (1 to getNumberOfDays(now.getMonthValue)).map(padNumber))
+def getDaysAsLists(date: LocalDate = LocalDate.now): (String, List[List[String]]) =
+  val dayOfWeek = LocalDate.of(date.getYear, date.getMonth, 1).getDayOfWeek.getValue
+  val spacing = List.fill(dayOfWeek - 1)("  ")
+  val header = s"${date.getMonth} ${date.getYear}"
+  (s"$header${" " * (weekDaysAsString.length - header.length)}",
+    (spacing ++ (1 to getNumberOfDays(date.getMonthValue)).map(padNumber))
       .sliding(7, 7)
+      .toList)
+
+def formatCalendarMonths(date: LocalDate = LocalDate.now, monthsBefore: Int = 0, monthsAfter: Int = 0): String =
+  val (header, daysList) = getDaysAsLists(date)
+  val daysAsString = daysList
       .map(_.mkString(" "))
       .mkString("\n")
 
-  println(s"${now.getMonth} ${now.getYear}")
-  println(weekDaysAsString)
-  println(daysAsString)
+  s"$header\n$weekDaysAsString\n$daysAsString"
 
 @main
-def main(): Unit =
-  printCalendar()
+def main(args: String*): Unit =
+  args.toList match
+    case List() => println(formatCalendarMonths())
+    case List(_*) => println()
