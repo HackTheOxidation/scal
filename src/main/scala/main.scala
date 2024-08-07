@@ -3,7 +3,7 @@ package io.github.hacktheoxidation
 import java.time.LocalDate
 
 val weekDays = List("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
-val weekDaysAsString: String = weekDays.mkString(" ")
+val weekDaysAsString: String = weekDays.mkString(" ") + " "
 
 def padNumber(num: Int): String =
   if num < 10 then s"0$num" else s"$num"
@@ -23,15 +23,18 @@ def getDaysAsLists(date: LocalDate = LocalDate.now): (String, List[List[String]]
       .toList)
 
 def formatCalendarMonths(date: LocalDate = LocalDate.now, monthsBefore: Int = 0, monthsAfter: Int = 0): String =
-  val (header, daysList) = getDaysAsLists(date)
+  val (header, daysList) = ((date.getMonthValue - monthsBefore) to (date.getMonthValue + monthsAfter))
+    .map(i => getDaysAsLists(LocalDate.of(date.getYear, i, 1)))
+    .reduce((a, b) => ((a._1 + b._1), a._2.zip(b._2).map((a, b) => a.concat(b))))
   val daysAsString = daysList
       .map(_.mkString(" "))
       .mkString("\n")
+  val totalNumberOfMonths = 1 + monthsBefore + monthsAfter
 
-  s"$header\n$weekDaysAsString\n$daysAsString"
+  s"$header\n${weekDaysAsString * totalNumberOfMonths}\n$daysAsString"
 
 @main
 def main(args: String*): Unit =
   args.toList match
-    case List() => println(formatCalendarMonths())
+    case List() => println(formatCalendarMonths(LocalDate.now, 1, 1))
     case List(_*) => println()
